@@ -1,0 +1,3 @@
+# Block direct public HTTP access to database backups
+Require all denied
+Deny from all
