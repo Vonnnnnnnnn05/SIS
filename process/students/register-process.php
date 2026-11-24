@@ -14,14 +14,17 @@ require_once __DIR__ . '/../../includes/logger.php';
 
 require_role(['Administrator', 'Registrar']);
 
+$current_auth = current_user();
+$redirect_base = ($current_auth['role_name'] === 'Administrator') ? (APP_URL . '/admin/students') : (APP_URL . '/registrar/students');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    redirect(APP_URL . '/registrar/students/index.php');
+    redirect($redirect_base . '/index.php');
 }
 
 // 1. Verify CSRF Token
 if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
     set_flash_message('danger', 'Invalid security token. Please try again.');
-    redirect(APP_URL . '/registrar/students/register.php');
+    redirect($redirect_base . '/register.php');
 }
 
 // 2. Extract and sanitize inputs
@@ -44,12 +47,12 @@ if (empty($student_number) || empty($first_name) || empty($last_name) || empty($
     empty($gender) || empty($email) || empty($contact) || empty($address) || 
     empty($em_name) || empty($em_phone) || $program_id <= 0) {
     set_flash_message('danger', 'Please complete all required fields marked with an asterisk (*).');
-    redirect(APP_URL . '/registrar/students/register.php');
+    redirect($redirect_base . '/register.php');
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     set_flash_message('danger', 'Please provide a valid email address.');
-    redirect(APP_URL . '/registrar/students/register.php');
+    redirect($redirect_base . '/register.php');
 }
 
 $conn = db_connect();
@@ -63,7 +66,7 @@ mysqli_stmt_store_result($stmt_check_id);
 if (mysqli_stmt_num_rows($stmt_check_id) > 0) {
     mysqli_stmt_close($stmt_check_id);
     set_flash_message('danger', "Student number '{$student_number}' already exists in the system.");
-    redirect(APP_URL . '/registrar/students/register.php');
+    redirect($redirect_base . '/register.php');
 }
 mysqli_stmt_close($stmt_check_id);
 
@@ -75,7 +78,7 @@ mysqli_stmt_store_result($stmt_check_u);
 if (mysqli_stmt_num_rows($stmt_check_u) > 0) {
     mysqli_stmt_close($stmt_check_u);
     set_flash_message('danger', "User account handle '{$student_number}' already exists.");
-    redirect(APP_URL . '/registrar/students/register.php');
+    redirect($redirect_base . '/register.php');
 }
 mysqli_stmt_close($stmt_check_u);
 
@@ -87,7 +90,7 @@ mysqli_stmt_store_result($stmt_check_em);
 if (mysqli_stmt_num_rows($stmt_check_em) > 0) {
     mysqli_stmt_close($stmt_check_em);
     set_flash_message('danger', "Email address '{$email}' is already registered.");
-    redirect(APP_URL . '/registrar/students/register.php');
+    redirect($redirect_base . '/register.php');
 }
 mysqli_stmt_close($stmt_check_em);
 
@@ -131,11 +134,11 @@ try {
 
     log_activity($conn, 'CREATE', 'STUDENTS', $new_student_id, "Registered new student {$student_number} ({$last_name}, {$first_name})");
     set_flash_message('success', "Student {$student_number} successfully registered! Student portal account provisioned.");
-    redirect(APP_URL . "/registrar/students/view.php?id={$new_student_id}");
+    redirect("{$redirect_base}/view.php?id={$new_student_id}");
 
 } catch (Exception $e) {
     mysqli_rollback($conn);
     error_log("Student Registration Error: " . $e->getMessage());
     set_flash_message('danger', 'Registration failed due to a database error: ' . $e->getMessage());
-    redirect(APP_URL . '/registrar/students/register.php');
+    redirect($redirect_base . '/register.php');
 }

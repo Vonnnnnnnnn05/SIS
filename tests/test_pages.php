@@ -48,6 +48,7 @@ $pages_to_test = [
     ['file' => 'admin/students/index.php', 'role' => 'Administrator', 'user_id' => 1],
     ['file' => 'admin/students/view.php', 'role' => 'Administrator', 'user_id' => 1, 'get_id' => $active_st_id],
     ['file' => 'admin/students/edit.php', 'role' => 'Administrator', 'user_id' => 1, 'get_id' => $active_st_id],
+    ['file' => 'admin/students/register.php', 'role' => 'Administrator', 'user_id' => 1],
     ['file' => 'admin/programs/index.php', 'role' => 'Administrator', 'user_id' => 1],
     ['file' => 'admin/programs/create.php', 'role' => 'Administrator', 'user_id' => 1],
     ['file' => 'admin/programs/edit.php', 'role' => 'Administrator', 'user_id' => 1, 'get_id' => $active_prog_id],
